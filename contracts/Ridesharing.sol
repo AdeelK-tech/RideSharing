@@ -18,18 +18,18 @@ contract RideSharing {
     mapping(uint => Ride) public idToRide;
     mapping(uint => uint) public riderIdtorideId;
     mapping(uint => Rider) RideIdToRider;
+
     struct driver {
-        uint driverURIId;
         uint Id;
         string name;
         string nic;
         string email;
         string cellno;
+        string LiscenceNo;
         bool isRegistered;
         Car car;
     }
     struct Rider {
-        uint driverURIId;
         uint Id;
         string name;
         string email;
@@ -42,10 +42,14 @@ contract RideSharing {
     struct Ride {
         uint rideId;
         address creator;
-        string startPoint;
-        string destination;
+        string StartTime;
+        uint seats;
+        string sourceLong;
+        string sourceLat;
+        string destLong;
+        string destLat;
     }
-    event registered(string name, string nic, string regNum);
+    event registered(uint driverId, string name, string nic, string regNum);
     modifier driverIsRegisteredModifier() {
         require(driverIsRegistered[msg.sender] == true);
         _;
@@ -62,24 +66,24 @@ contract RideSharing {
     }
 
     function registerForDriver(
-        uint driverURI_Id,
         string memory _name,
         string memory _nic,
         string memory _email,
         string memory _cellno,
         string memory _regNum,
-        string memory _modelName
+        string memory _modelName,
+        string memory _LiscenceNo
     ) public {
         Car memory c = Car(_regNum, _modelName);
         driverId.increment();
         uint _driverId = driverId.current();
         driver memory d = driver(
-            driverURI_Id,
             _driverId,
             _name,
             _nic,
             _email,
             _cellno,
+            _LiscenceNo,
             true,
             c
         );
@@ -87,33 +91,45 @@ contract RideSharing {
         idToDriver[_driverId] = d;
         addressToDriver[msg.sender] = d;
         console.log(msg.sender);
-        emit registered(_name, _nic, _regNum);
+        emit registered(_driverId, _name, _nic, _regNum);
     }
 
     function registerForRider(
-        uint riderURI_Id,
         string memory _name,
         string memory _email,
         string memory _cellno
     ) public {
         RiderId.increment();
         uint _RiderId = RiderId.current();
-        Rider memory r = Rider(riderURI_Id, _RiderId, _name, _email, _cellno); // Continue From here
+        Rider memory r = Rider(_RiderId, _name, _email, _cellno); // Continue From here
         riderIsRegistered[msg.sender] = true;
         idToRider[_RiderId] = r;
         addressToRider[msg.sender] = r;
         console.log(msg.sender);
-        emit registered(_name, _email, _cellno);
+        emit registered(_RiderId, _name, _email, _cellno);
     }
 
-    function createRide(string memory startPoint, string memory destination)
-        public
-        driverIsRegisteredModifier
-    {
+    function createRide(
+        string memory sourceLong,
+        string memory sourceLat,
+        string memory destLong,
+        string memory destLat,
+        string memory startTime,
+        uint seats
+    ) public driverIsRegisteredModifier {
         uint _driverId = getDriverByAddress(msg.sender);
         RideId.increment();
         uint _rideId = RideId.current();
-        Ride memory _ride = Ride(_rideId, msg.sender, startPoint, destination);
+        Ride memory _ride = Ride(
+            _rideId,
+            msg.sender,
+            startTime,
+            seats,
+            sourceLong,
+            sourceLat,
+            destLong,
+            destLat
+        );
         idToRide[_rideId] = _ride;
         RideIDTodriverId[_rideId] = _driverId;
     }
@@ -124,11 +140,9 @@ contract RideSharing {
         RideIdToRider[rideId] = r;
     }
 
-    function getRidersByRideId(uint rideId)
-        public
-        view
-        returns (Rider[] memory)
-    {
+    function getRidersByRideId(
+        uint rideId
+    ) public view returns (Rider[] memory) {
         uint ridesCount;
         uint j;
         for (uint i = 1; i <= RideId.current(); i++) {
@@ -143,5 +157,17 @@ contract RideSharing {
             }
         }
         return ridersAtARide;
+    }
+
+    function getUserType(address user) public view returns (uint) {
+        uint userType;
+        Rider memory r = addressToRider[user];
+        driver memory d = addressToDriver[user];
+        if (r.Id == 0 && d.Id != 0) {
+            userType = 1;
+        } else if (r.Id != 0 && d.Id == 0) {
+            userType = 2;
+        }
+        return userType;
     }
 }
