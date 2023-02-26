@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
-ALCHEMY_API_KEY = "7R-Kjv7qdzXJ4wRJSwFWvcfrqCXbzd6Z";
+require("@nomiclabs/hardhat-etherscan");
+ALCHEMY_API_KEY = "yVoCNnVuTu2dcUMio5Ax0K2Ecuv1eSCr";
 PRIVATE_KEY =
   "8dd9a1413df575220c56e07aa6954e21de61129d9ebc5a89816513cc86fa0167";
 module.exports = {

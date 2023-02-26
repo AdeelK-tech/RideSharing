@@ -1,14 +1,32 @@
 const { ethers } = require("hardhat");
-
+require("@nomiclabs/hardhat-etherscan");
 async function main() {
-  const driver = await ethers.getContractFactory("Driver");
-  const driverContract = await driver.deploy();
-  const rider = await ethers.getContractFactory("Rider");
-  const riderContract = await rider.deploy();
   const rideSharing = await ethers.getContractFactory("RideSharing");
+  const gasPrice = await rideSharing.signer.getGasPrice();
+  console.log(`Current gas price: ${gasPrice}`);
+  const estimatedGas = await rideSharing.signer.estimateGas(
+    rideSharing.getDeployTransaction()
+  );
+  console.log(`Estimated gas: ${estimatedGas}`);
+  const deploymentPrice = gasPrice.mul(estimatedGas);
+  const deployerBalance = await rideSharing.signer.getBalance();
+  console.log(
+    `Deployer balance:  ${ethers.utils.formatEther(deployerBalance)}`
+  );
+  console.log(
+    `Deployment price:  ${ethers.utils.formatEther(deploymentPrice)}`
+  );
+  if (deployerBalance.lt(deploymentPrice)) {
+    throw new Error(
+      `Insufficient funds. Top up your account balance by ${ethers.utils.formatEther(
+        deploymentPrice.sub(deployerBalance)
+      )}`
+    );
+  }
+
   const rideSharingCon = await rideSharing.deploy();
-  console.log("driver address:", driverContract.address);
-  console.log("rider address:", riderContract.address);
+  await rideSharingCon.deployed();
+
   console.log("ridesharing address:", rideSharingCon.address);
 }
 
