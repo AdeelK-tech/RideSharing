@@ -152,6 +152,7 @@ contract RideSharing {
         // uint seats,
         // uint fair
         driverIsRegisteredModifier
+        returns (uint)
     {
         uint _driverId = getDriverByAddress(msg.sender);
         RideId.increment();
@@ -173,6 +174,7 @@ contract RideSharing {
         idToRide[_rideId] = _ride;
         RideIDTodriverId[_rideId] = _driverId;
         DriverIdToRide[_driverId] = _ride;
+        return _rideId;
     }
 
     function setFair(uint rideId, uint fair) public {
