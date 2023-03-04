@@ -72,6 +72,7 @@ contract RideSharing {
         string cellno
     );
     event UserType(uint Type, uint id);
+    event RideCreated(uint id);
     error AlreadyRegistered(string msg);
     error ridenotCompleted(string msg);
     error lessThanFair(string msg);
@@ -152,7 +153,6 @@ contract RideSharing {
         // uint seats,
         // uint fair
         driverIsRegisteredModifier
-        returns (uint)
     {
         uint _driverId = getDriverByAddress(msg.sender);
         RideId.increment();
@@ -174,7 +174,7 @@ contract RideSharing {
         idToRide[_rideId] = _ride;
         RideIDTodriverId[_rideId] = _driverId;
         DriverIdToRide[_driverId] = _ride;
-        return _rideId;
+        emit RideCreated(_rideId);
     }
 
     function setFair(uint rideId, uint fair) public {
