@@ -204,7 +204,7 @@ contract RideSharing {
         Ride[] memory ridesByRider = new Ride[](ridesCount);
         for (uint i = 1; i <= ridesCount; i++) {
             if (RideIdToRiderId[i] == riderId) {
-                ridesByRider[j] = riderIdtoride[i];
+                ridesByRider[j] = idToRide[i];
                 j++;
             }
         }
