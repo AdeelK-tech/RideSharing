@@ -17,7 +17,7 @@ contract RideSharing {
     mapping(uint => Ride) public idToRide;
     mapping(uint => uint) public riderIdtorideId;
     mapping(uint => Ride) public riderIdtoride;
-    mapping(uint => Rider) RideIdToRider;
+    mapping(uint => Rider) public RideIdToRider;
     mapping(uint => Ride) DriverIdToRide;
     mapping(uint => uint) RideIdToRiderId;
     struct driver {
@@ -287,11 +287,11 @@ contract RideSharing {
         _ride.currState = state.completed;
     }
 
-    function startRide(uint rideId) public {
-        Ride storage _ride = idToRide[rideId];
+    // function startRide(uint rideId) public {
+    //     Ride storage _ride = idToRide[rideId];
 
-        _ride.currState = state.completed;
-    }
+    //     _ride.currState = state.completed;
+    // }
 
     function payForRide(uint rideId) public payable {
         Ride memory _ride = idToRide[rideId];
