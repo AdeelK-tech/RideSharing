@@ -57,6 +57,7 @@ contract RideSharing {
         string destLat;
         state currState;
         bool isPayed;
+        bool isJoined;
         uint fair;
     }
     event registeredDriver(
@@ -169,6 +170,7 @@ contract RideSharing {
             destLat,
             state.created,
             false,
+            false,
             0
         );
         idToRide[_rideId] = _ride;
@@ -185,7 +187,8 @@ contract RideSharing {
     function joinRide(uint rideId, uint riderId) public {
         riderIdtorideId[riderId] = rideId;
         Rider memory r = idToRider[riderId];
-        Ride memory _ride = idToRide[rideId];
+        Ride storage _ride = idToRide[rideId];
+        _ride.isJoined = true;
         RideIdToRider[rideId] = r;
         RideIdToRiderId[rideId] = riderId;
         riderIdtoride[riderId] = _ride;
@@ -204,7 +207,6 @@ contract RideSharing {
         Ride[] memory ridesByRider = new Ride[](ridesCount);
         for (uint i = 1; i <= ridesCount; i++) {
             if (RideIdToRiderId[i] == riderId) {
-                ridesByRider[j] = idToRide[i];
                 j++;
             }
         }
@@ -244,7 +246,7 @@ contract RideSharing {
         Ride[] memory ridesByDriver = new Ride[](ridesCount);
         for (uint i = 1; i <= ridesCount; i++) {
             if (RideIDTodriverId[i] == DriverId) {
-                ridesByDriver[j] = DriverIdToRide[DriverId];
+                ridesByDriver[j] = idToRide[i];
                 j++;
             }
         }
@@ -273,11 +275,19 @@ contract RideSharing {
 
     function getAllRides() public view returns (Ride[] memory) {
         uint j;
-
-        Ride[] memory rides = new Ride[](RideId.current());
+        uint rideCount;
         for (uint i = 1; i <= RideId.current(); i++) {
-            rides[j] = idToRide[i];
-            j++;
+            if (idToRide[i].isJoined == false) {
+                rideCount++;
+            }
+        }
+        Ride[] memory rides = new Ride[](rideCount);
+
+        for (uint i = 1; i <= RideId.current(); i++) {
+            if (idToRide[i].isJoined == false) {
+                rides[j] = idToRide[i];
+                j++;
+            }
         }
         return rides;
     }
@@ -287,11 +297,11 @@ contract RideSharing {
         _ride.currState = state.completed;
     }
 
-    // function startRide(uint rideId) public {
-    //     Ride storage _ride = idToRide[rideId];
+    function startRide(uint rideId) public {
+        Ride storage _ride = idToRide[rideId];
 
-    //     _ride.currState = state.completed;
-    // }
+        _ride.currState = state.completed;
+    }
 
     function payForRide(uint rideId) public payable {
         Ride memory _ride = idToRide[rideId];
